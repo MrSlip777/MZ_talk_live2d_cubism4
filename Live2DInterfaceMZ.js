@@ -6,7 +6,7 @@
  */
 
 /* 更新履歴
- * Slip 2020/08/23 ツクールMVプラグインをベースに新規作成
+ * Slip 2020/01/20 ツクールMV用プラグイン向けに修正
  *
  * 本プラグインの再配布、改変はLive2D Open Software licenseに準拠します。
  *
@@ -681,11 +681,6 @@ Live2DSprite.prototype._render = function(renderer) {
     $gameLive2d.gl = renderer.gl;
     $gameLive2d.canvas = renderer.view;
 
-    if (!this.frameBuffer) {
-        //this.frameBuffer = $gameLive2d.gl.getParameter($gameLive2d.gl.FRAMEBUFFER_BINDING);
-        this.frameBuffer = renderer.framebuffer;
-    }
-
     if (!this.modelReady) {
         const gl = renderer.gl;
         // it is unreasonable how the next line works... 
@@ -707,12 +702,13 @@ Live2DSprite.prototype._render = function(renderer) {
         return;
     }
 
-    const useVAO = !!(renderer.createVao && renderer.bindVao);
+    //const useVAO = !!(renderer.createVao && renderer.bindVao);
+    const useVAO = renderer.geometry.hasVao;
 
     var _activeVao;
     //let _activeVao; Slip 2017/03/24
     if (useVAO) {
-        _activeVao = renderer._activeVao;
+        _activeVao = renderer.geometry._activeVao;
     } else {
         //ツクールMZ対応　flush -> batch.flush
         renderer.batch.flush();
@@ -721,12 +717,6 @@ Live2DSprite.prototype._render = function(renderer) {
     var temp_gl = renderer.gl;
 
     const currentProgram = temp_gl.getParameter(temp_gl.CURRENT_PROGRAM);
-
-    var activeTexture;
-    
-    if (!useVAO) {
-        activeTexture = temp_gl.getParameter(temp_gl.ACTIVE_TEXTURE);
-    }
 
     temp_gl.activeTexture(temp_gl.TEXTURE0);
     temp_gl.activeTexture(temp_gl.TEXTURE1);
@@ -737,8 +727,10 @@ Live2DSprite.prototype._render = function(renderer) {
 
     var vao;
     if (useVAO) {
-        vao = renderer.createVao();
-        renderer.bindVao(vao);
+        //vao = renderer.createVao();
+        //renderer.bindVao(vao);
+        vao = temp_gl.createVertexArray();
+        temp_gl.bindVertexArray(vao);
     }
 
     //slip 2020/08/22 ツクールMZ対応 bindRenderTexture -> renderTexture.bind
