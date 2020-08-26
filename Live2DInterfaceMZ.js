@@ -181,6 +181,21 @@
 * @text モーション再生
 * @desc 指定したモデルのモーションを再生します
 *
+* @arg modelName
+* @type string
+* @desc モデル名
+* @default 
+*
+* @arg motionName
+* @type string
+* @desc モーション名
+* @default 
+*
+* @arg loop
+* @type boolean
+* @desc ループする/しない
+* @default false
+*
 * @command expression
 * @text 表情変更
 * @desc 指定したモデルの表情を変更します
@@ -193,6 +208,18 @@
 * @arg modelName
 * @type string
 * @default
+*
+* @command scale
+* @text 倍率変更
+* @desc 指定したモデルの倍率を変更します
+*
+* @arg modelName
+* @type string
+* @default 
+*
+* @arg scale
+* @type Number
+* @default 
 *
 *
 * @help
@@ -678,41 +705,19 @@ Live2DSprite.prototype.createShader = function () {
 //Live2DSprite.prototype._renderWebGL
 Live2DSprite.prototype._render = function(renderer) {
 
+    
     $gameLive2d.gl = renderer.gl;
     $gameLive2d.canvas = renderer.view;
 
     if (!this.modelReady) {
-        const gl = renderer.gl;
-        // it is unreasonable how the next line works... 
-        gl.activeTexture(gl.TEXTURE0);
-        
         this.texture
          = PIXI.RenderTexture.create($gameLive2d.canvas.width, $gameLive2d.canvas.height);
-        this.createShader();
-        this.modelReady = true;
+
+         this.modelReady = true;
         return;
     }
 
-    while (this.onModelReady.length) {
-        const func = this.onModelReady.shift();
-        func();
-    }
-
-    if (!this.visible) {
-        return;
-    }
-
-    //const useVAO = !!(renderer.createVao && renderer.bindVao);
     const useVAO = renderer.geometry.hasVao;
-
-    var _activeVao;
-    //let _activeVao; Slip 2017/03/24
-    if (useVAO) {
-        _activeVao = renderer.geometry._activeVao;
-    } else {
-        //ツクールMZ対応　flush -> batch.flush
-        renderer.batch.flush();
-    }
 
     var temp_gl = renderer.gl;
 
@@ -720,25 +725,21 @@ Live2DSprite.prototype._render = function(renderer) {
 
     temp_gl.activeTexture(temp_gl.TEXTURE0);
     temp_gl.activeTexture(temp_gl.TEXTURE1);
-
-    const _activeTextureLocation = renderer._activeTexture ? renderer._activeTextureLocation : 0;
-    //slip 2020/08/22 ツクールMZ向けに修正 activeRenderTarget -> renderTexture
-    const _renderTexture = renderer.renderTexture;
-
+    
     var vao;
     if (useVAO) {
-        //vao = renderer.createVao();
-        //renderer.bindVao(vao);
         vao = temp_gl.createVertexArray();
         temp_gl.bindVertexArray(vao);
     }
 
     //slip 2020/08/22 ツクールMZ対応 bindRenderTexture -> renderTexture.bind
-    renderer.renderTexture.bind(this.texture);
+    //this.bindRenderTexture(renderer.renderTexture,renderer);
+
     temp_gl.clearColor(0.0, 0.0, 0.0, 0.0);
     temp_gl.clear(temp_gl.COLOR_BUFFER_BIT);
     temp_gl.frontFace(temp_gl.CW);
 
+    //モーションの更新
     if($gameLive2d._lappLive2dManager){
         
         LAppPal.updateTime();
@@ -747,15 +748,10 @@ Live2DSprite.prototype._render = function(renderer) {
 
     }
     
-    if (!useVAO) {
-        renderer._activeTextureLocation = _activeTextureLocation;
-        temp_gl.activeTexture(temp_gl.TEXTURE0 + _activeTextureLocation);
-    }
-    temp_gl.bindTexture(temp_gl.TEXTURE_2D, null);
     temp_gl.useProgram(currentProgram);
-
-    //以下が必要だけどどうすればよいか不明
-    //renderer.bindRenderTarget(_activeRenderTarget);
+    
+    renderer.renderTexture.bind(this.texture);
+    
 }
 
 var Csm_CubismFramework = Live2DCubismFramework.CubismFramework;
@@ -776,7 +772,9 @@ Live2DSprite.prototype.initializeCubism = function () {
 
 //argsは配列なので考慮すること slip 2017/03/24
 Live2DSprite.prototype.destroy = function(args) {
-    this.model.release();
+    if(this.model){
+        this.model.release();
+    }
 };
 
 if (PIXI) {
@@ -809,6 +807,7 @@ if (PIXI) {
 
     const Scene_Map_start = Scene_Map.prototype.start;
     Scene_Map.prototype.start = function(){
+        
         Scene_Map_start.call(this);
         this.createlive2d();
     };
@@ -842,20 +841,31 @@ if (PIXI) {
         Live2DManager.prototype.live2dVisible(model_no,false);
     });
 
+    PluginManager.registerCommand(pluginName, "motion", args => {
+        var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
+        var loop = false;
+        if(args.loop == "false"){
+            loop = false;
+        }
+        else{
+            loop = true;
+        }
+
+        var innerMotionName = $gameLive2d.InnerMotionName(args.modelName,args.motionName);
+
+        Live2DManager.prototype.live2dSequenceMotion(model_no,innerMotionName,loop);
+    });
+
+    PluginManager.registerCommand(pluginName, "scale", args => {
+        var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
+        Live2DManager.prototype.live2dSetScale(model_no,args.scale);
+    });    
 
     PluginManager.registerCommand(pluginName, "set", args => {
 
         var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
 
         switch (args[1]) {
-        case 'show':
-        case '表示':
-            Live2DManager.prototype.live2dVisible(model_no,true);
-            break;
-        case 'hide':
-        case '消去':
-            Live2DManager.prototype.live2dVisible(model_no,false);
-            break;
         case 'motion':
         case 'モーション':
             var loop = true;
@@ -932,24 +942,6 @@ if (PIXI) {
         case '衣装変更':
         case 'changecloth':
             Live2DManager.prototype.live2dChangeCloth(model_no,args[2]);
-
-        default:
-            var loop = true;
-            if(args.lenght <= 3){
-                loop = true;
-            }
-            else{
-                if(args[2] == "ループ" || args[2] == "ループする" ||args[2] == "loop"){
-                    loop = true;
-                }
-                else if(args[2] == "ループなし" || args[2] == "ループしない" ||args[2] == "noloop"){
-                    loop = false;
-                }
-            }
-            var innerMotionName = $gameLive2d.InnerMotionName(args[0],args[1]);
-
-            Live2DManager.prototype.live2dSequenceMotion(model_no,innerMotionName,loop);
-            break;
         }
         
     });
