@@ -6,10 +6,12 @@
  */
 
 /* 更新履歴
- * Slip 2020/01/20 ツクールMV用プラグイン向けに修正
+ * Slip 2021/07/14 ツクールMZ用プラグイン向けに作成（ベースはツクールMV用のLive2Dプラグイン）
  *
+ *スペシャルサンクス：おっぎーさん(@o_ggy)
+ *
+ *[利用規約]
  * 本プラグインの再配布、改変はLive2D Open Software licenseに準拠します。
- *
  * Live2D Open Software 使用許諾契約書
  * https://www.live2d.com/eula/live2d-open-software-license-agreement_jp.html
 */
@@ -19,75 +21,23 @@
 * ツクールMZ上でlive2dを立ち絵表示するプラグイン
 * @author Slip
 *
+* @param Modelcondition
+* @desc live2d model individual setting
+* live2dモデル個別設定
+* @default
+* @type struct<ModelconditionData>[]
+*
 * @param ModelPosition
 * @type note
 * @default Model placement
 * @desc Model placement
 * モデル配置
 *
-* @param ModelScaling
-* @type note
-* @default Scale model
-* @desc Scale model
-* モデルの拡大・縮小
-*
-* @param PlayBack
-* @type note
-* @default Motion playback
-* @desc Motion playback
-* モーション再生
-*
 * @param Screen
 * @type note
 * @default screen
 * @desc screen
 * 画面
-*
-* @param Scene
-* @type note
-* @default Scenes such as maps and battle screens
-* @desc Scenes such as maps and battle screens
-* マップ、戦闘画面等のシーン
-*
-* @param SaveData
-* @type note
-* @default Save data
-* @desc Save data
-* セーブデータ
-*
-* @param LinkEquipment
-* @type note
-* @default Linked setting with equipment
-* @desc Linked setting with equipment.
-* 装備品との連動設定
-*
-* @param upsidedown
-* @type boolean
-* @desc Upside down display
-* 上下反転表示
-* @default false
-* @parent Screen
-*
-* @param playbackSpeed
-* @type number
-* @desc Playback speed
-* 再生速度
-* @default 8
-* @parent PlayBack
-*
-* @param AdjustWeight
-* @type number
-* @desc Deformation weight adjustment parameter
-* 変形の重み調整パラメータ
-* @default 8
-* @parent PlayBack
-*
-* @param ScaleGain
-* @type number
-* @desc Scaling growth rate
-* 拡大縮小の増加率
-* @default 2
-* @parent ModelScaling
 *
 * @param vertical
 * @type number
@@ -125,20 +75,6 @@
 * @max 816
 * @parent ModelPosition
 *
-* @param includesave
-* @desc Include the display status of live2d in save data
-* live2dの表示状況をセーブデータに含める
-* @default true
-* @type boolean
-* @parent SaveData
-*
-* @param useinbattle
-* @desc Live2d model use flag in battle scene
-* 戦闘画面でのlive2dモデル使用フラグ
-* @default false
-* @type boolean
-* @parent Scene
-*
 * @param pictpriority
 * @type number
 * @desc The live2d model is displayed before the picture below this ID.
@@ -147,19 +83,6 @@
 * @max 100
 * @default 10
 * @parent Screen
-*
-* @param useLinkEquipment
-* @desc use flag LinkEquipment.
-* 装備品との連動フラグ
-* @default false
-* @type boolean
-* @parent LinkEquipment
-*
-* @param Modelcondition
-* @desc live2d model individual setting
-* live2dモデル個別設定
-* @default
-* @type struct<ModelconditionData>[]
 *
 * @command show
 * @text 表示
@@ -200,9 +123,56 @@
 * @text 表情変更
 * @desc 指定したモデルの表情を変更します
 *
-* @command position
+* @command pos
 * @text 位置変更
 * @desc 指定したモデルの位置を変更します
+*
+* @arg modelName
+* @type string
+* @default
+* @desc モデル名
+*
+* @arg x
+* @type number
+* @default 408
+* @desc X位置
+*
+* @arg y
+* @type number
+* @default 312
+* @desc Y位置
+*
+* @arg dur
+* @type number
+* @default 1
+* @desc 移動時間
+*
+* @arg wait
+* @type boolean
+* @default false
+* @desc ウェイトありなし
+*
+* @command left
+* @text 左
+* @desc 指定したモデル位置を左にします。
+*
+* //引数
+* @arg modelName
+* @type string
+* @default
+*
+* @command middle
+* @text 真ん中
+* @desc 指定したモデル位置を真ん中にします。
+*
+* //引数
+* @arg modelName
+* @type string
+* @default
+*
+* @command right
+* @text 右
+* @desc 指定したモデル位置を右にします。
 *
 * //引数
 * @arg modelName
@@ -220,6 +190,18 @@
 * @arg scale
 * @type Number
 * @default 
+*
+* @command paraminitskip
+* @text モーション強制初期化
+* @desc モーション再生時にモデルパラメータを初期化します
+*
+* @arg modelName
+* @type string
+* @default 
+*
+* @arg IsInit
+* @type boolean
+* @default true
 *
 *
 * @help
@@ -259,7 +241,91 @@
  * モーションの名称を設定できます。
  * @type note
  * @default "<basic:Idle_1,Idle_3>\n<angry:Idle_4>"
- 
+ * 
+ */
+
+/**
+ * //一旦保留
+* @param ModelScaling
+* @type note
+* @default Scale model
+* @desc Scale model
+* モデルの拡大・縮小
+*
+* @param PlayBack
+* @type note
+* @default Motion playback
+* @desc Motion playback
+* モーション再生
+*
+* @param LinkEquipment
+* @type note
+* @default Linked setting with equipment
+* @desc Linked setting with equipment.
+* 装備品との連動設定
+*
+* @param upsidedown
+* @type boolean
+* @desc Upside down display
+* 上下反転表示
+* @default false
+* @parent Screen
+*
+* @param playbackSpeed
+* @type number
+* @desc Playback speed
+* 再生速度
+* @default 8
+* @parent PlayBack
+*
+* @param AdjustWeight
+* @type number
+* @desc Deformation weight adjustment parameter
+* 変形の重み調整パラメータ
+* @default 8
+* @parent PlayBack
+
+* @param Scene
+* @type note
+* @default Scenes such as maps and battle screens
+* @desc Scenes such as maps and battle screens
+* マップ、戦闘画面等のシーン
+*
+* @param SaveData
+* @type note
+* @default Save data
+* @desc Save data
+* セーブデータ
+*
+* @param ScaleGain
+* @type number
+* @desc Scaling growth rate
+* 拡大縮小の増加率
+* @default 2
+* @parent ModelScaling
+*
+* @param includesave
+* @desc Include the display status of live2d in save data
+* live2dの表示状況をセーブデータに含める
+* @default true
+* @type boolean
+* @parent SaveData
+*
+* @param useinbattle
+* @desc Live2d model use flag in battle scene
+* 戦闘画面でのlive2dモデル使用フラグ
+* @default false
+* @type boolean
+* @parent Scene
+*
+* @param useLinkEquipment
+* @desc use flag LinkEquipment.
+* 装備品との連動フラグ
+* @default false
+* @type boolean
+* @parent LinkEquipment
+*
+
  * @param individual_upsidedown
  * @type boolean
  * @desc Individual upside down flag
@@ -301,8 +367,17 @@
  * 装飾品なし時のモーション
  * @default
  * @parent SettingLinkEquipment
- * 
+
+
+*/
+
+
+// ----------------------------
+/**
+ * 共通関数
+ * 概要：ツクールエディタのプラグインで設定した変数をやりとりする関数群
  */
+// ----------------------------
 
 function parseStrToBoolean(str) {
     // 文字列を判定
@@ -370,7 +445,7 @@ L2DINmodels.forEach(function(Ldata) {
     L2DINextractmeta(Ldata);
 });
 
-//他仕様定義
+//共通変数(Live2Dファイル拡張子、画面解像度)
 const model3expend = '.model3.json';
 const motion3expend = '.motion3.json';
 const L2DINgrawidth = 816;
@@ -384,7 +459,27 @@ const AdjustWeight = Number(L2DINPP['AdjustWeight']) / 10;
 
 const ScaleGain = Number(L2DINPP['ScaleGain']);
 
-//Game_Live2dの追加
+
+//-----------------------------------------------------------------------------
+//MotionElement
+//モーションのグループ、番号のまとまり
+//Slip 2021/07/03
+//-----------------------------------------------------------------------------
+function MotionElement() {
+    this.number = -1;
+    this.groupName = "none";
+    this.Isloop = false;
+}
+
+// ----------------------------
+/* クラス：Game_Live2d
+ * 概要：Live2Dモデルをツクール上で動作させるためのデータを持つクラス。
+ * 扱いはgame_xxxと同等($gameLive2dをインスタンスとして、メソッドを呼び出す)
+*/
+//----------------------------
+
+var $gameLive2d = null;
+
 function Game_Live2d() {
     this.initialize.apply(this, arguments);
 }
@@ -396,7 +491,7 @@ Game_Live2d.prototype.initialize = function() {
 //マジックナンバーだと分かりにくいのでパラメータ設定のモデル名をkeyにする。
 Game_Live2d.prototype.clear = function() {
 
-    var parameters = PluginManager.parameters('Live2DInterfaceMV');
+    var parameters = PluginManager.parameters('Live2DInterfaceMZ');
 
     //エディタ(プラグインの設定)から取得する設定値
     this._folder = {};
@@ -417,9 +512,14 @@ Game_Live2d.prototype.clear = function() {
     this._duration ={};     //移動する時間
     this._live2dmodelsaveonly = {}; //セーブ用データ
     
-    //モーション関係のデータ　（セーブデータの保存、読み込み用として必要）
+    //モーション関係のデータ　（モーション再生、セーブデータの保存、読み込みとして必要）
     this.motionGroup = {};
     this.motionNumber = {};
+    this.motionElements = {};
+
+    //モーションの強制実行フラグ
+    this.IsForcedExe_NextMotion = {};
+
     this.motionLoop = {};
     this.paraminitskip = {};
 
@@ -439,12 +539,6 @@ Game_Live2d.prototype.clear = function() {
 
     this.InitializeModelSetting();
 
-    //内部変数
-    //Cubism4対応 Slip 2020/01/13
-    this._textureManager = new LAppTextureManager();
-    this.gl = null;
-    this.canvas = null;
-    this._lappLive2dManager = null;
 };
 
 //各モデル設定値の初期化
@@ -464,11 +558,15 @@ Game_Live2d.prototype.InitializeModelSetting = function(){
         this.G[i] = 1.0;
         this.B[i] = 1.0;
         this._duration[i] = 0;
-        this.pos_x[i] =this._pos_middle;
-        this.pos_y[i] = 0;
+        this.pos_x[i] = this._pos_middle;
+        this.pos_y[i] = this._pos_vertical;
         this._live2dmodelsaveonly[this._name[i]] = {};
         this.motionGroup[i] = "Idle";
         this.motionNumber[i] = 1;
+        this.motionElements[i] = []; 
+
+        this.IsForcedExe_NextMotion[i] = false;
+
         this.motionLoop[i] = false;
         this.paraminitskip[i] = false;
 
@@ -581,7 +679,7 @@ Game_Live2d.prototype.live2dupdate = function () {
             model_no++;
         }
 
-        var model = $gameLive2d._lappLive2dManager._models.at(model_no-1);
+        var model = null;
         if(model !== null){
             this.live2dupdateMove(model_no);
         }
@@ -617,336 +715,6 @@ Game_Live2d.prototype.InnerMotionName = function (name, group){
     }
 };
 
-var $gameLive2d = null;
-
-//---モデル描画するキャンバス設定---
-function Live2DSprite(){
-    this.initialize.apply(this, arguments);
-}
-
-Live2DSprite.prototype = Object.create(Sprite.prototype);
-Live2DSprite.prototype.constructor = Live2DSprite;
-
-Live2DSprite.prototype.initialize = function() {
-
-    Sprite.prototype.initialize.call(this);
-    this._cubismOption = new Live2DCubismFramework.Option();
-
-    this.modelReady = false;
-    this.frameBuffer = null;
-
-    this._programId = null;
-    this.onModelReady = [];
-
-    this.texture = null;
-
-};
-
-/**
- * 解放する。
- */
-Live2DSprite.prototype.release = function () {
-
-    // リソースを解放する　→　開放しないへ変更（ゲーム終了時まで）
-    //LAppLive2DManager.releaseInstance();
-    //$gameLive2d._lappLive2dManager = null;
-    // Cubism SDKの解放
-    Csm_CubismFramework.dispose();
-};
-
-/**
- * シェーダーを登録する。
- */
-Live2DSprite.prototype.createShader = function () {
-    // バーテックスシェーダーのコンパイル
-    var vertexShaderId = $gameLive2d.gl.createShader($gameLive2d.gl.VERTEX_SHADER);
-    if (vertexShaderId == null) {
-        LAppPal.printLog("failed to create vertexShader");
-        return null;
-    }
-    var vertexShader = "precision mediump float;" +
-        "attribute vec3 position;" +
-        "attribute vec2 uv;" +
-        "varying vec2 vuv;" +
-        "void main(void)" +
-        "{" +
-        "   gl_Position = vec4(position, 1.0);" +
-        "   vuv = uv;" +
-        "}";
-    $gameLive2d.gl.shaderSource(vertexShaderId, vertexShader);
-    $gameLive2d.gl.compileShader(vertexShaderId);
-    // フラグメントシェーダのコンパイル
-    var fragmentShaderId = $gameLive2d.gl.createShader($gameLive2d.gl.FRAGMENT_SHADER);
-    if (fragmentShaderId == null) {
-       LAppPal.printLog("failed to create fragmentShader");
-        return null;
-    }
-    var fragmentShader = "precision mediump float;" +
-        "varying vec2 vuv;" +
-        "uniform sampler2D texture;" +
-        "void main(void)" +
-        "{" +
-        "   gl_FragColor = texture2D(texture, vuv);" +
-        "}";
-        $gameLive2d.gl.shaderSource(fragmentShaderId, fragmentShader);
-        $gameLive2d.gl.compileShader(fragmentShaderId);
-    // プログラムオブジェクトの作成
-    var programId = $gameLive2d.gl.createProgram();
-    $gameLive2d.gl.attachShader(programId, vertexShaderId);
-    $gameLive2d.gl.attachShader(programId, fragmentShaderId);
-    $gameLive2d.gl.deleteShader(vertexShaderId);
-    $gameLive2d.gl.deleteShader(fragmentShaderId);
-    // リンク
-    $gameLive2d.gl.linkProgram(programId);
-    $gameLive2d.gl.useProgram(programId);
-    return programId;
-};
-
-//Live2DSprite.prototype._renderWebGL
-Live2DSprite.prototype._render = function(renderer) {
-
-    
-    $gameLive2d.gl = renderer.gl;
-    $gameLive2d.canvas = renderer.view;
-
-    if (!this.modelReady) {
-        this.texture
-         = PIXI.RenderTexture.create($gameLive2d.canvas.width, $gameLive2d.canvas.height);
-
-         this.modelReady = true;
-        return;
-    }
-
-    const useVAO = renderer.geometry.hasVao;
-
-    var temp_gl = renderer.gl;
-
-    const currentProgram = temp_gl.getParameter(temp_gl.CURRENT_PROGRAM);
-
-    temp_gl.activeTexture(temp_gl.TEXTURE0);
-    temp_gl.activeTexture(temp_gl.TEXTURE1);
-    
-    var vao;
-    if (useVAO) {
-        vao = temp_gl.createVertexArray();
-        temp_gl.bindVertexArray(vao);
-    }
-
-    //slip 2020/08/22 ツクールMZ対応 bindRenderTexture -> renderTexture.bind
-    //this.bindRenderTexture(renderer.renderTexture,renderer);
-
-    temp_gl.clearColor(0.0, 0.0, 0.0, 0.0);
-    temp_gl.clear(temp_gl.COLOR_BUFFER_BIT);
-    temp_gl.frontFace(temp_gl.CW);
-
-    //モーションの更新
-    if($gameLive2d._lappLive2dManager){
-        
-        LAppPal.updateTime();
-        $gameLive2d.gl.flush();
-        $gameLive2d._lappLive2dManager.onUpdate();
-
-    }
-    
-    temp_gl.useProgram(currentProgram);
-    
-    renderer.renderTexture.bind(this.texture);
-    
-}
-
-var Csm_CubismFramework = Live2DCubismFramework.CubismFramework;
-
-Live2DSprite.prototype.initializeCubism = function () {
-    // setup cubism
-    this._cubismOption.logFunction = LAppPal.printMessage;
-    this._cubismOption.loggingLevel = LAppDefine.CubismLoggingLevel;
-    Csm_CubismFramework.startUp(this._cubismOption);
-    // initialize cubism
-    Csm_CubismFramework.initialize();
-    // load model
-    $gameLive2d._lappLive2dManager = LAppLive2DManager.getInstance();
-    // default proj
-    var projection = new Csm_CubismMatrix44();
-    LAppPal.updateTime();
-};
-
-//argsは配列なので考慮すること slip 2017/03/24
-Live2DSprite.prototype.destroy = function(args) {
-    if(this.model){
-        this.model.release();
-    }
-};
-
-if (PIXI) {
-    PIXI.Live2DSprite = Live2DSprite;
-  } else {
-    console.error('Error: Cannot find global variable `PIXI`, Live2D plguin will not be installed.');
-}
-
-(() => {
-    'use strict'
-    const  DataManager_createGameObjects = DataManager.createGameObjects;
-    DataManager.createGameObjects =function(){
-        DataManager_createGameObjects.call(this);
-        if($gameLive2d == null){
-            $gameLive2d = new Game_Live2d();
-        }
-    };
-    const Scene_Map_updateWaitCount =Scene_Map.prototype.updateWaitCount;
-    Scene_Map.prototype.updateWaitCount =function(){
-
-        Scene_Map_updateWaitCount.call(this);
-
-    };
-
-    const Scene_Map_terminate=Scene_Map.prototype.terminate;
-    Scene_Map.prototype.terminate =function(){
-        this.terminatelive2d();
-        Scene_Map_terminate.call(this);
-    };
-
-    const Scene_Map_start = Scene_Map.prototype.start;
-    Scene_Map.prototype.start = function(){
-        
-        Scene_Map_start.call(this);
-        this.createlive2d();
-    };
-
-    const Scene_Map_update = Scene_Map.prototype.update;
-    Scene_Map.prototype.update = function() {
-        Scene_Map_update.call(this);
-    
-        $gameLive2d.live2dupdate();
-    };
-
-    const  Game_Interpreter_updateWaitCount = Game_Interpreter.prototype.updateWaitCount;
-    Game_Interpreter.prototype.updateWaitCount = function() {
-        if ($gameLive2d._waitCount > 0) {
-            $gameLive2d._waitCount--;
-            return true;
-        }
-        return Game_Interpreter_updateWaitCount.call(this);
-    };
-
-    // プラグインコマンド
-    const pluginName = 'Live2DInterfaceMZ';
-
-    PluginManager.registerCommand(pluginName, "show", args => {
-        var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
-        Live2DManager.prototype.live2dVisible(model_no,true);
-    });
-
-    PluginManager.registerCommand(pluginName, "hide", args => {
-        var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
-        Live2DManager.prototype.live2dVisible(model_no,false);
-    });
-
-    PluginManager.registerCommand(pluginName, "motion", args => {
-        var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
-        var loop = false;
-        if(args.loop == "false"){
-            loop = false;
-        }
-        else{
-            loop = true;
-        }
-
-        var innerMotionName = $gameLive2d.InnerMotionName(args.modelName,args.motionName);
-
-        Live2DManager.prototype.live2dSequenceMotion(model_no,innerMotionName,loop);
-    });
-
-    PluginManager.registerCommand(pluginName, "scale", args => {
-        var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
-        Live2DManager.prototype.live2dSetScale(model_no,args.scale);
-    });    
-
-    PluginManager.registerCommand(pluginName, "set", args => {
-
-        var model_no = Live2DManager.prototype.getNumberFromName(args.modelName);
-
-        switch (args[1]) {
-        case 'motion':
-        case 'モーション':
-            var loop = true;
-            if(args.lenght <= 3){
-                loop = true;
-            }
-            else{
-                if(args[4] == "ループ" || args[4] == "ループする" ||args[4] == "loop"){
-                    loop = true;
-                }
-                else if(args[4] == "ループなし" || args[4] == "ループしない" ||args[4] == "noloop"){
-                    loop = false;
-                }
-            }
-            Live2DManager.prototype.live2dMotion(model_no,args[2],args[3],loop);
-            break;
-        case 'expression':
-        case '表情':
-            Live2DManager.prototype.live2dExpression(model_no,args[2]);
-            break;
-        case 'left':
-        case '左':
-            Live2DManager.prototype.live2dSetPosition_X(model_no,$gameLive2d._pos_left);
-
-            break;
-        case 'middle':
-        case '中央':
-            Live2DManager.prototype.live2dSetPosition_X(model_no,$gameLive2d._pos_middle);
-
-            break;
-        case 'right':
-        case '右':
-            Live2DManager.prototype.live2dSetPosition_X(model_no,$gameLive2d._pos_right);
-            
-            break;
-        case 'Xposition':
-        case 'X位置':
-            Live2DManager.prototype.live2dSetPosition_X(model_no,args[2]);
-            break;
-        case 'Yposition':
-        case 'Y位置':
-            Live2DManager.prototype.live2dSetPosition_Y(model_no,args[2]);
-            break;
-        case 'pos':
-        case '位置':
-            const x = Number(args[2]) || 0;
-            const y = Number(args[3]) || 0;
-            const dur = Number(args[4]) || 0;
-            var wait = false;
-            if(args[5] === 'wait' || args[5] === 'ウェイト'){
-                wait = true;
-            }
-            Live2DManager.prototype.live2dSetPosition(model_no, x, y, dur, wait);
-        break;
-
-        case 'grayscale':
-        case 'グレースケール':
-            Live2DManager.prototype.live2dSetGrayscale(model_no,args[2]);
-            break;
-        case 'scale':
-        case '倍率変更':
-            Live2DManager.prototype.live2dSetScale(model_no,args[2]);
-            break;
-        case 'paraminitskip':
-        case 'パラメータ初期化スキップ':
-            const result = (args[2] === 'true');
-            Live2DManager.prototype.live2dsetparaminitskip(model_no, result);
-            break;
-
-        case 'upsidedown':
-        case '上下反転':
-            Live2DManager.prototype.live2dSetScale(model_no,args[2]);
-            break;
-        case '衣装変更':
-        case 'changecloth':
-            Live2DManager.prototype.live2dChangeCloth(model_no,args[2]);
-        }
-        
-    });
-})();
-
 //-----------------------------------------------------------------------------
 //Live2DManager
 //会話上にLive2Dモデルを表示するクラス 
@@ -954,18 +722,17 @@ if (PIXI) {
 //-----------------------------------------------------------------------------
 function Live2DManager() {
     this.initialize.apply(this, arguments);
-}
+};
 
 var live2dmodel = {};
 
-Live2DManager.prototype.initialize = function() {
+Live2DManager.initialize = function() {
     for(var i=1; i<=$gameLive2d.MAXNUMBER; i++){
         live2dmodel[i] = null;
     }
+};
 
-}
-
-Live2DManager.prototype.getNumberFromName = function(modelName) {
+Live2DManager.getNumberFromName = function(modelName) {
 
     var gameLive2d_no = 1;
     for(var number in $gameLive2d._name){
@@ -979,12 +746,12 @@ Live2DManager.prototype.getNumberFromName = function(modelName) {
 };
 
 //表示フラグ
-Live2DManager.prototype.live2dVisible = function (model_no,flag) {
+Live2DManager.live2dVisible = function (model_no,flag) {
     $gameLive2d.visible[model_no] = flag;
 };
 
 //モーション設定
-Live2DManager.prototype.live2dMotion = function (model_no,motionGroup,motion_no,loop){
+Live2DManager.live2dMotion = function (model_no,motionGroup,motion_no,loop){
     $gameLive2d._lappLive2dManager._models.at(model_no-1).changeMotion(motionGroup,motion_no-1, loop);
 
     //セーブデータ保存用
@@ -996,7 +763,7 @@ Live2DManager.prototype.live2dMotion = function (model_no,motionGroup,motion_no,
 }
 
 //すべてのモデルの設定されたモーションを再生する（表示されたモーションのみ。セーブデータのロード用）
-Live2DManager.prototype.PlayBackAllModel = function(){
+Live2DManager.PlayBackAllModel = function(){
     
     for(var i = 1; i<=$gameLive2d.MAXNUMBER; i++){
         if($gameLive2d.visible[i] == true){
@@ -1005,55 +772,74 @@ Live2DManager.prototype.PlayBackAllModel = function(){
     }
 }
 
-//モーション モーションA再生後にモーションBを再生する
-Live2DManager.prototype.live2dSequenceMotion = function (model_no,motions,loop){
-    if($gameLive2d._lappLive2dManager._models.at(model_no-1)){
-        $gameLive2d._lappLive2dManager._models.at(model_no-1).SequenceMotion(motions, loop);
-        var motionNames = (String(motions)).split(',');
-        motionNames.forEach(function(motionName){
-            var data = (String(motionName)).split('_');
-            //セーブデータ保存用
-            $gameLive2d.motionGroup[model_no] = data[0];
-            $gameLive2d.motionNumber[model_no] = Number(data[1])-1;//実際にあつかうモーションNoは-1されている
-        });
-        //セーブデータ保存用
-        $gameLive2d.motionLoop[model_no] = loop;
 
-        this.Modelparaminit(model_no);
-    }
+
+//モーション再生
+Live2DManager.live2dSequenceMotion = function (model_no,motions,loop){
+
+    var count_inLoop = 1;
+    var motionNames = (String(motions)).split(',');
+    var count_Max = motionNames.length;
+
+    //スタックされたモーションがあるかもしれないので一掃する
+    $gameLive2d.motionElements[model_no].splice(0);
+
+    //強制実行
+    $gameLive2d.IsForcedExe_NextMotion[model_no] = true;
+
+    motionNames.forEach(function(motionName){
+        var data = (String(motionName)).split('_');
+
+        var motionElement = new MotionElement();
+        motionElement.groupName = data[0];
+        motionElement.number = Number(data[1])-1;
+        
+        if(count_Max == count_inLoop){
+            motionElement.Isloop = loop;
+            //セーブデータ保存用
+            $gameLive2d.motionLoop[model_no] = loop;
+        }
+        else{
+            motionElement.Isloop = false;
+        }
+
+        $gameLive2d.motionElements[model_no].push(motionElement);
+
+        //セーブデータ保存用
+        $gameLive2d.motionGroup[model_no] = data[0];
+        $gameLive2d.motionNumber[model_no] = Number(data[1])-1;//実際にあつかうモーションNoは-1されている
+
+        count_inLoop = count_inLoop + 1;
+    });
 }
 
 //表情設定
-Live2DManager.prototype.live2dExpression = function (model_no,expressionId){
+Live2DManager.live2dExpression = function (model_no,expressionId){
     $gameLive2d._lappLive2dManager._models.at(model_no-1).changeExpression(expressionId);
 }
 
 //位置変更（移動可能）
-Live2DManager.prototype.live2dSetPosition = function (model_no, x, y, dur, wait) {
-    const model = $gameLive2d._lappLive2dManager._models.at(model_no-1);
-    if(model !== null){
-        if(dur > 0){
-            $gameLive2d._targetX[model_no] = x;
-            $gameLive2d._targetY[model_no] = y;
-        }else{
-            $gameLive2d.pos_x[model_no] = x;
-            $gameLive2d.pos_y[model_no] = y;
-        }
-        $gameLive2d._duration[model_no] = dur;
-        if(wait){
-            $gameLive2d._waitCount = dur;
-        }
+Live2DManager.live2dSetPosition = function (model_no, x, y, dur, wait) {
+    if(dur > 0){
+        $gameLive2d._targetX[model_no] = x;
+        $gameLive2d._targetY[model_no] = y;
+    }else{
+        $gameLive2d.pos_x[model_no] = x;
+        $gameLive2d.pos_y[model_no] = y;
+    }
+    $gameLive2d._duration[model_no] = dur;
+    if(wait){
+        $gameLive2d._waitCount = dur;
     }
 };
 
 //表示位置変更
-Live2DManager.prototype.live2dSetPosition_X = function (model_no,pos_x) {
-    var canvas = $gameLive2d.canvas;
+Live2DManager.live2dSetPosition_X = function (model_no,pos_x) {
     if(pos_x < 1){
         pos_x = 1;
     }
-    else if(pos_x > canvas.width){
-        pos_x = canvas.width;
+    else if(pos_x > Graphics.width){
+        pos_x = Graphics.width;
     }
     else{
         pos_x = pos_x;
@@ -1063,13 +849,13 @@ Live2DManager.prototype.live2dSetPosition_X = function (model_no,pos_x) {
 };
 
 //表示位置変更
-Live2DManager.prototype.live2dSetPosition_Y = function (model_no,pos_y) {
-    var canvas = $gameLive2d.canvas;
+Live2DManager.live2dSetPosition_Y = function (model_no,pos_y) {
+    
     if(pos_y < 1){
         pos_y = 1;
     }
-    else if(pos_y > canvas.height){
-        pos_y = canvas.height;
+    else if(pos_y > Graphics.height){
+        pos_y = Graphics.height;
     }
     else{
         pos_y = pos_y;
@@ -1079,37 +865,17 @@ Live2DManager.prototype.live2dSetPosition_Y = function (model_no,pos_y) {
 };
 
 //倍率変更
-Live2DManager.prototype.live2dSetScale = function (model_no,scale) {
+Live2DManager.live2dSetScale = function (model_no,scale) {
     $gameLive2d.scale[model_no] = scale;
 };
 
 //初期化スキップ
-Live2DManager.prototype.live2dsetparaminitskip = function (model_no, flag) {
-    const model = $gameLive2d._lappLive2dManager._models.at(model_no-1);
-    if(model !== null){
-        if(flag){
-            model._paraminitskip = true;
-        }else{
-            model._paraminitskip = false;
-            this.Modelparaminit(model_no);
-        }
-        //セーブデータ保存用
-        $gameLive2d.paraminitskip[model_no] = model._paraminitskip;
-    }
-};
-
-//モーション間で使用してないパラメータが異なる場合があるため更新に関わらずパラメータ初期化
-Live2DManager.prototype.Modelparaminit = function (model_no){
-    const model = $gameLive2d._lappLive2dManager._models.at(model_no-1);
-    if(model !== null && !model._paraminitskip){
-        if(model._model){
-            model._model._parameterValues.fill(0);
-        }
-    }
+Live2DManager.live2dsetparaminitskip = function (model_no, flag) {
+    $gameLive2d.paraminitskip[model_no] = flag;
 };
 
 //グレースケール変更
-Live2DManager.prototype.live2dSetGrayscale = function (model_no,grayscale){
+Live2DManager.live2dSetGrayscale = function (model_no,grayscale){
 
     $gameLive2d.R[model_no] = grayscale;
     $gameLive2d.G[model_no] = grayscale;
@@ -1117,18 +883,18 @@ Live2DManager.prototype.live2dSetGrayscale = function (model_no,grayscale){
 };
 
 //上下反転
-Live2DManager.prototype.live2dDisplayDirection = function (flag) {
+Live2DManager.live2dDisplayDirection = function (flag) {
     $gameLive2d._IsUpsidedown = flag;
 };
 
 //衣装変更
-Live2DManager.prototype.live2dChangeCloth = function (model_no,Id) {
+Live2DManager.live2dChangeCloth = function (model_no,Id) {
     $gameLive2d._lappLive2dManager._models.at(model_no-1).setClothMotion(Id);
     
 };
 
 //装備とモデルの連動
-Live2DManager.prototype.live2dClothLinkEquipment = function(){
+Live2DManager.live2dClothLinkEquipment = function(){
 
     //衣装変更用
     for(var i = 0; i<$gameParty._actors.length; i++){
@@ -1149,7 +915,7 @@ Live2DManager.prototype.live2dClothLinkEquipment = function(){
                         var innerMotionName = null;
 
                         innerMotionName = $gameLive2d.InnerMotionName($gameLive2d._name[number],cloth_name);
-                        var modelNo = Live2DManager.prototype.getNumberFromName($gameLive2d._name[number]);
+                        var modelNo = Live2DManager.getNumberFromName($gameLive2d._name[number]);
 
                         $gameLive2d._lappLive2dManager._models.at(modelNo-1).setClothMotion(innerMotionName);
                     }
@@ -1159,105 +925,357 @@ Live2DManager.prototype.live2dClothLinkEquipment = function(){
     };
 };
 
-//モデルロード完了数
-var $LoadCount_Live2DModel = 0;
+// ----------------------------
+// Sprite_Live2d
+// ----------------------------
+function Sprite_Live2d() {
+    this.initialize.apply(this, arguments);
+};
+Sprite_Live2d.prototype = Object.create(PIXI.Container.prototype);
+Sprite_Live2d.prototype.constructor = Sprite_Live2d;
 
-//初回モデル読み込みフラグ
-var IsFirstLoad = true;
+Sprite_Live2d.prototype.initialize = function() {
+    PIXI.Container.call(this);
+    this._model = null;
+};
 
-//初回モデル読み込みトリガーフラグ
-var IsFirstLoad_Trigger = true;
+Sprite_Live2d.prototype.update = function() {
+    if (this._model) {
+        this._model.update(16);
+    }
+};
 
-//---シーン上にlive2dモデル用スプライトを作成する---
-Scene_Base.prototype.createlive2d = function(){
+Sprite_Live2d.prototype.loadModel = function(name) {
 
-    this.live2dSprite = new PIXI.Live2DSprite();
-    
-    SceneManager._scene._spriteset.addChildlive2d(this.live2dSprite);
-    this.live2dSprite.initializeCubism();
+    this.clear();
+    const option = {autoInteract:false, autoUpdate:false, motionPreload: PIXI.live2d.MotionPreloadStrategy.ALL};
+    PIXI.live2d.Live2DModel.from('./' + name, option).then((model)=>{
+        this._model = model;
+        this.addChild(model);
+        model.anchor.set(0.5, 0.5);
+    }).catch((error) => {
+        console.error(error);
+    });
+};
 
-    if(IsFirstLoad == true && IsFirstLoad_Trigger == true){
-        $gameLive2d._lappLive2dManager.loadModels();
+Sprite_Live2d.prototype.clear = function() {
+    if (this._model) {
+        this.removeChild(this._model);
+        this._model = null;
+    }
+};
+
+
+(() => {
+    'use strict'
+
+    //---Scene_Baseの上書き---
+    //---シーン上にlive2dモデル用スプライトを作成する---
+    Scene_Base.prototype.createlive2d = function(){
+
+        this.live2dSprite = {};
+
+        for(var i = 1; i<=$gameLive2d.MAXNUMBER; i++){
+
+            var fileFullPath = $gameLive2d._folder[i] + $gameLive2d._model[i] + ".model3.json";
+
+            this.live2dSprite[i] = new Sprite_Live2d();
+            this.live2dSprite[i].loadModel(fileFullPath);
+            this.live2dSprite[i].x = $gameLive2d.pos_x[i];
+            this.live2dSprite[i].y = $gameLive2d.pos_y[i];
+            this.live2dSprite[i].scale.set(0.2, 0.2);
+
+            //非表示で描画する
+            //this.live2dSprite[i].alpha = 0;
+            this.live2dSprite[i].visible = false;
+
+            SceneManager._scene._spriteset.addChildlive2d(this.live2dSprite[i]);
+
+            //セーブデータの設定値をモデルに反映
+            $gameLive2d.ReflectSavedataToModels();
+        }
         
-        //セーブデータの設定値をモデルに反映
-        $gameLive2d.ReflectSavedataToModels();
-        IsFirstLoad_Trigger = false;
-        //IsFirstLoad_Trigger をfalseにする
-        //【注意】IsFirstLoad　は　LAppModel.prototype.setupTextures　で　false にしている
-    }
-
-    if(L2DINuseLinkEquipment == true){
-        Live2DManager.prototype.live2dClothLinkEquipment();
-    }
-};
-
-Spriteset_Base.prototype.addChildlive2d = function(Sprite) {
-    if(L2DINpictpriority >= 100){
-        this.addChild(Sprite);
-    }else{
-        this._pictureContainer.addChildAt(Sprite, L2DINpictpriority);
-    }
-};
-
-Scene_Base.prototype.terminatelive2d = function(){
-    this.live2dSprite.release();
-};
-
-//---Live2dモデルの設定をセーブデータに含める機能---
-if(L2DINincludesave){
-
-    const L2DINmakeSaveContents = DataManager.makeSaveContents;
-    DataManager.makeSaveContents = function() {
-        const contents = L2DINmakeSaveContents.call(this);
-        contents.Live2d = $gameLive2d.Createsavemodel();
-        return contents;
-    };
-    
-    const L2DINextractSaveContents = DataManager.extractSaveContents;
-    DataManager.extractSaveContents = function(contents) {
-        L2DINextractSaveContents.call(this, contents);
-        if(!!contents && !!contents.Live2d){
-            $gameLive2d.Restoresavemodel(contents.Live2d);
+        if(L2DINuseLinkEquipment == true){
+            Live2DManager.live2dClothLinkEquipment();
         }
     };
 
-    const L2DINsetupNewGame = DataManager.setupNewGame;
-    DataManager.setupNewGame = function() {
-        L2DINsetupNewGame.call(this);
-        $gameLive2d.newgamefix();
-    };
+    Scene_Base.prototype.updatelive2d = function(){
+        for(var i = 1; i<=$gameLive2d.MAXNUMBER; i++){
+            //表示非表示の更新
+            this.live2dSprite[i].visible = $gameLive2d.visible[i];
 
-}else{
-    console.log("Live2d表示はセーブ・ロードしません。");
-}
+            if(this.live2dSprite[i]._model){
+                //位置を更新する
+                $gameLive2d.live2dupdateMove(i);
+                this.live2dSprite[i].x = $gameLive2d.pos_x[i];
+                this.live2dSprite[i].y = $gameLive2d.pos_y[i];
+                this.live2dSprite[i].scale
+                .set(0.2*$gameLive2d.scale[i], 0.2*$gameLive2d.scale[i]);
 
-//---Live2dモデルの戦闘画面表示機能---
-if(L2DINuseinbattle){
+                if(this.live2dSprite[i]._model.internalModel){
 
-    Scene_Battle.prototype.istickerupd =function(){
-        return true;
-    };
+                    //モーションの開始条件は以下
+                    //1:モーション終了している
+                    //2:プラグインコマンドからの実行（強制実行フラグ：true）
+                    if(this.live2dSprite[i]._model.internalModel.motionManager.isFinished()
+                    || $gameLive2d.IsForcedExe_NextMotion[i] == true){
+                        var motionElement = $gameLive2d.motionElements[i].shift();
 
-    const Battle_L2DINupdate = Scene_Battle.prototype.update;
-    Scene_Battle.prototype.update = function() {
-        Battle_L2DINupdate.call(this);
-        $gameLive2d.live2dupdate();
-    };
+                        if(motionElement){
+                            //初期化スキップ（モデルのモーションパラメータを0にする）
+                            if($gameLive2d.paraminitskip[i]){
+                                this.live2dSprite[i]._model.internalModel.coreModel._parameterValues.fill(0);
+                            }
 
-    const Battle_L2DINterminate = Scene_Battle.prototype.terminate;
-    Scene_Battle.prototype.terminate = function() {
-        Battle_L2DINterminate.call(this);
-        this.terminatelive2d();
-    };
+                            this.live2dSprite[i]._model.internalModel.motionManager.stopAllMotions();
+
+                            //モーションのループ設定
+                            this.live2dSprite[i]._model.internalModel.motionManager
+                            .motionGroups[motionElement.groupName][motionElement.number]
+                            .setIsLoop(motionElement.Isloop);
+                            
+                            this.live2dSprite[i]._model.motion(motionElement.groupName,motionElement.number,3);
+
+                            //強制実行フラグをオフ（デフォルトに戻す）
+                            $gameLive2d.IsForcedExe_NextMotion[i] = false;
+
+                        }
+                    }
+                }
+            }
+        }
+
+        
+        if(this.live2dSprite[2]._model){
+            
+            //console.log(outPut);
+            var outPut1 = this.live2dSprite[2]._model.internalModel.motionManager;
+            var outPut11 = this.live2dSprite[2]._model.internalModel.motionManager.motionGroups;
+            var outPut12 = outPut11["Idle"][2].setIsLoop(true);
+            var outPut2 = this.live2dSprite[2]._model;
+            var outPut3 = this.live2dSprite[2]._model.internalModel;
+        }
     
-    const Battle_L2DINcreateWindowLayer = Scene_Battle.prototype.createWindowLayer;
-    Scene_Battle.prototype.createWindowLayer = function(){
-        this.createlive2d();
-        Battle_L2DINcreateWindowLayer.call(this);
     };
 
-}else{
-    console.log("Live2d表示はマップシーンのみです。");
-}
+    Spriteset_Base.prototype.addChildlive2d = function(Sprite) {
+        if(L2DINpictpriority >= 100){
+            this.addChild(Sprite);
+        }else{
+            this._pictureContainer.addChildAt(Sprite, L2DINpictpriority);
+        }
+    };
 
+    Scene_Base.prototype.terminatelive2d = function(){
+        for(var i = 1; i<=$gameLive2d.MAXNUMBER; i++){
+            this.live2dSprite[i].clear();
+        }
+    };
 
+    const  DataManager_createGameObjects = DataManager.createGameObjects;
+    DataManager.createGameObjects =function(){
+        DataManager_createGameObjects.call(this);
+        if($gameLive2d == null){
+            $gameLive2d = new Game_Live2d();
+        }
+    };
+
+    //Scene_Mapの上書き
+    const Scene_Map_updateWaitCount =Scene_Map.prototype.updateWaitCount;
+    Scene_Map.prototype.updateWaitCount =function(){
+
+        Scene_Map_updateWaitCount.call(this);
+
+    };
+
+    const Scene_Map_terminate=Scene_Map.prototype.terminate;
+    Scene_Map.prototype.terminate =function(){
+        this.terminatelive2d();
+        Scene_Map_terminate.call(this);
+    };
+
+    const Scene_Map_start = Scene_Map.prototype.start;
+    Scene_Map.prototype.start = function(){        
+        Scene_Map_start.call(this);
+        this.createlive2d();
+    };
+
+    const Scene_Map_update = Scene_Map.prototype.update;
+    Scene_Map.prototype.update = function() {
+        Scene_Map_update.call(this);
+        $gameLive2d.live2dupdate();
+        this.updatelive2d();
+    };
+
+    //---Live2dモデルの戦闘画面表示機能---
+    if(L2DINuseinbattle){
+
+        Scene_Battle.prototype.istickerupd =function(){
+            return true;
+        };
+
+        const Battle_L2DINupdate = Scene_Battle.prototype.update;
+        Scene_Battle.prototype.update = function() {
+            Battle_L2DINupdate.call(this);
+            $gameLive2d.live2dupdate();
+        };
+
+        const Battle_L2DINterminate = Scene_Battle.prototype.terminate;
+        Scene_Battle.prototype.terminate = function() {
+            Battle_L2DINterminate.call(this);
+            this.terminatelive2d();
+        };
+        
+        const Battle_L2DINcreateWindowLayer = Scene_Battle.prototype.createWindowLayer;
+        Scene_Battle.prototype.createWindowLayer = function(){
+            this.createlive2d();
+            Battle_L2DINcreateWindowLayer.call(this);
+        };
+
+    }else{
+        console.log("Live2d表示はマップシーンのみです。");
+    }
+
+    //---Live2dモデルの設定をセーブデータに含める機能---
+    if(L2DINincludesave){
+
+        const L2DINmakeSaveContents = DataManager.makeSaveContents;
+        DataManager.makeSaveContents = function() {
+            const contents = L2DINmakeSaveContents.call(this);
+            contents.Live2d = $gameLive2d.Createsavemodel();
+            return contents;
+        };
+        
+        const L2DINextractSaveContents = DataManager.extractSaveContents;
+        DataManager.extractSaveContents = function(contents) {
+            L2DINextractSaveContents.call(this, contents);
+            if(!!contents && !!contents.Live2d){
+                $gameLive2d.Restoresavemodel(contents.Live2d);
+            }
+        };
+
+        const L2DINsetupNewGame = DataManager.setupNewGame;
+        DataManager.setupNewGame = function() {
+            L2DINsetupNewGame.call(this);
+            $gameLive2d.newgamefix();
+        };
+
+    }else{
+        console.log("Live2d表示はセーブ・ロードしません。");
+    }
+
+    //---プラグインコマンドの処理---
+    const  Game_Interpreter_updateWaitCount = Game_Interpreter.prototype.updateWaitCount;
+    Game_Interpreter.prototype.updateWaitCount = function() {
+        if ($gameLive2d._waitCount > 0) {
+            $gameLive2d._waitCount--;
+            return true;
+        }
+        return Game_Interpreter_updateWaitCount.call(this);
+    };
+
+    // プラグインコマンド
+    const pluginName = 'Live2DInterfaceMZ';
+
+    PluginManager.registerCommand(pluginName, "show", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dVisible(model_no,true);
+    });
+
+    PluginManager.registerCommand(pluginName, "hide", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dVisible(model_no,false);
+    });
+
+    PluginManager.registerCommand(pluginName, "motion", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        var loop = false;
+        if(args.loop == "false"){
+            loop = false;
+        }
+        else{
+            loop = true;
+        }
+
+        var innerMotionName = $gameLive2d.InnerMotionName(args.modelName,args.motionName);
+
+        Live2DManager.live2dSequenceMotion(model_no,innerMotionName,loop);
+    });
+
+    //位置変更
+    //左
+    PluginManager.registerCommand(pluginName, "left", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dSetPosition_X(model_no,$gameLive2d._pos_left);
+    });
+
+    //真ん中
+    PluginManager.registerCommand(pluginName, "middle", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dSetPosition_X(model_no,$gameLive2d._pos_middle);
+    });
+
+    //右
+    PluginManager.registerCommand(pluginName, "right", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dSetPosition_X(model_no,$gameLive2d._pos_right);
+    });
+
+    //位置移動
+    PluginManager.registerCommand(pluginName, "pos", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        const x = Number(args.x) || 0;
+        const y = Number(args.y) || 0;
+        const dur = Number(args.dur) || 0;
+        var wait = args.wait;
+        
+        Live2DManager.live2dSetPosition(model_no, x, y, dur, wait);    
+    });
+
+    //大きさ変更
+    PluginManager.registerCommand(pluginName, "scale", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dSetScale(model_no,args.scale);
+    });    
+
+    //初期化スキップ（強制モーション初期化）
+    PluginManager.registerCommand(pluginName, "paraminitskip", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dsetparaminitskip(model_no, args.IsInit);
+    });
+
+    //以下は実装するか検討中　slip 2021/07/14
+    PluginManager.registerCommand(pluginName, "set", args => {
+
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+
+        switch (args[1]) {
+        case 'expression':
+        case '表情':
+            Live2DManager.live2dExpression(model_no,args[2]);
+            break;
+        case 'Xposition':
+        case 'X位置':
+            Live2DManager.live2dSetPosition_X(model_no,args[2]);
+            break;
+        case 'Yposition':
+        case 'Y位置':
+            Live2DManager.live2dSetPosition_Y(model_no,args[2]);
+            break;
+        case 'grayscale':
+        case 'グレースケール':
+            Live2DManager.live2dSetGrayscale(model_no,args[2]);
+            break;
+
+        case 'upsidedown':
+        case '上下反転':
+            Live2DManager.live2dSetScale(model_no,args[2]);
+            break;
+        case '衣装変更':
+        case 'changecloth':
+            Live2DManager.live2dChangeCloth(model_no,args[2]);
+        }
+        
+    });
+})();
