@@ -6,12 +6,10 @@
  */
 
 /* 更新履歴
- * Slip 2021/07/14 ツクールMZ用プラグイン向けに作成（ベースはツクールMV用のLive2Dプラグイン）
+ * Slip 2021/07/11 ツクールMZ用プラグイン向けに作成（ベースはツクールMV用のLive2Dプラグイン）
  *
- *スペシャルサンクス：おっぎーさん(@o_ggy)
- *
- *[利用規約]
  * 本プラグインの再配布、改変はLive2D Open Software licenseに準拠します。
+ *
  * Live2D Open Software 使用許諾契約書
  * https://www.live2d.com/eula/live2d-open-software-license-agreement_jp.html
 */
@@ -33,11 +31,11 @@
 * @desc Model placement
 * モデル配置
 *
-* @param Screen
+* @param System
 * @type note
-* @default screen
-* @desc screen
-* 画面
+* @default System
+* @desc System
+* システム関連
 *
 * @param vertical
 * @type number
@@ -82,7 +80,22 @@
 * @min 0
 * @max 100
 * @default 10
-* @parent Screen
+* @parent System
+*
+* @param includesave
+* @desc Include the display status of live2d in save data
+* live2dの表示状況をセーブデータに含める
+* @default true
+* @type boolean
+* @parent System
+*
+* @param useinbattle
+* @desc Live2d model use flag in battle scene
+* 戦闘画面でのlive2dモデル使用フラグ
+* @default false
+* @type boolean
+* @parent System
+*
 *
 * @command show
 * @text 表示
@@ -304,19 +317,6 @@
 * @default 2
 * @parent ModelScaling
 *
-* @param includesave
-* @desc Include the display status of live2d in save data
-* live2dの表示状況をセーブデータに含める
-* @default true
-* @type boolean
-* @parent SaveData
-*
-* @param useinbattle
-* @desc Live2d model use flag in battle scene
-* 戦闘画面でのlive2dモデル使用フラグ
-* @default false
-* @type boolean
-* @parent Scene
 *
 * @param useLinkEquipment
 * @desc use flag LinkEquipment.
@@ -597,14 +597,26 @@ Game_Live2d.prototype.ReflectSavedataToModels = function(){
             this.scale[i] = saveobj.scx;
             this.pos_x[i] = saveobj.px;
             this.pos_y[i] = saveobj.py;
-            $gameLive2d._lappLive2dManager._models.at(i-1).motionGroup_Default
+            $gameLive2d.motionGroup[i]
              = saveobj.motionGroup;
-             $gameLive2d._lappLive2dManager._models.at(i-1).motionNumber_Default
+            $gameLive2d.motionNumber[i]
              = saveobj.motionNumber;
-             $gameLive2d._lappLive2dManager._models.at(i-1).motionLoop_Default
+            $gameLive2d.motionLoop[i]
              = saveobj.motionLoop;
-             $gameLive2d._lappLive2dManager._models.at(i-1).paraminitskip_Default
-             = saveobj.paraminitskip;
+
+            //モーションを強制実行する
+            $gameLive2d.IsForcedExe_NextMotion[i] = true;
+
+            $gameLive2d.motionElements[i].splice(0);
+
+            var motionElement = new MotionElement();
+            motionElement.groupName = saveobj.motionGroup;
+            motionElement.number = saveobj.motionNumber;
+            motionElement.Isloop = saveobj.motionLoop;
+            
+            $gameLive2d.motionElements[i].push(motionElement);
+
+            $gameLive2d.paraminitskip[i] = saveobj.paraminitskip;
         }
         i++;
     }, this);
@@ -771,8 +783,6 @@ Live2DManager.PlayBackAllModel = function(){
         }
     }
 }
-
-
 
 //モーション再生
 Live2DManager.live2dSequenceMotion = function (model_no,motions,loop){
@@ -1082,13 +1092,6 @@ Sprite_Live2d.prototype.clear = function() {
     };
 
     //Scene_Mapの上書き
-    const Scene_Map_updateWaitCount =Scene_Map.prototype.updateWaitCount;
-    Scene_Map.prototype.updateWaitCount =function(){
-
-        Scene_Map_updateWaitCount.call(this);
-
-    };
-
     const Scene_Map_terminate=Scene_Map.prototype.terminate;
     Scene_Map.prototype.terminate =function(){
         this.terminatelive2d();
@@ -1104,7 +1107,6 @@ Sprite_Live2d.prototype.clear = function() {
     const Scene_Map_update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function() {
         Scene_Map_update.call(this);
-        $gameLive2d.live2dupdate();
         this.updatelive2d();
     };
 
@@ -1118,7 +1120,7 @@ Sprite_Live2d.prototype.clear = function() {
         const Battle_L2DINupdate = Scene_Battle.prototype.update;
         Scene_Battle.prototype.update = function() {
             Battle_L2DINupdate.call(this);
-            $gameLive2d.live2dupdate();
+            this.updatelive2d();
         };
 
         const Battle_L2DINterminate = Scene_Battle.prototype.terminate;
