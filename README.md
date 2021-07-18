@@ -32,6 +32,32 @@ Project/assets/koharu/<br>
     model3.jsonファイル名：koharu.model3.json<br>
 
 ## プラグイン管理
-プラグインを以下の順番で設定してください。
+１．プラグインを以下の順番で設定してください。
 
 ![プラグイン管理](https://user-images.githubusercontent.com/17643697/126064520-26d6cd8a-e74a-4b72-84c2-5bee4ab7ad63.png)
+
+## live2DInterfaceMZの設定
+
+### Modelcondition
+１．Modelconditionで以下パラメータを設定します。<br>
+・Modelname<br>
+・folderpath<br>
+・motiongroupname<br>
+#### Modelname
+Modelnameはプラグインコマンド名でモデルを呼び出すときの名前です<br>
+例）Modelname：コハル<br>
+
+#### folderpath
+Live2Dモデルを置いたフォルダになります。<br>
+フォルダパスが"Project/assets/koharu/"である場合は以下のようになります<br>
+foldername：./assets/koharu/<br>
+
+#### motiongroupname
+プラグインコマンドでモーション再生するために必要な”モーション組名”を設定する項目欄です。<br>
+<モーション組名:グループ名><br>
+例）<きほん:Idle_1><br>
+2組設定した場合は連続でモーション再生します<br>
+例）<れんぞく:Idle_1,Idle_7><br>
+※グループ名・・・model3.jsonファイル内のMotionsの名称<br>
+![motion3.json内のグループ名](https://user-images.githubusercontent.com/17643697/83342186-1f282c80-a327-11ea-9a8b-4f4e6c0b124d.png)<br>
+
