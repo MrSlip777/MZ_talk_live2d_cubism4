@@ -61,3 +61,5 @@ foldername：./assets/koharu/<br>
 ※グループ名・・・model3.jsonファイル内のMotionsの名称<br>
 ![motion3.json内のグループ名](https://user-images.githubusercontent.com/17643697/83342186-1f282c80-a327-11ea-9a8b-4f4e6c0b124d.png)<br>
 
+https://www.youtube.com/watch?v=OUYY3nMYPD0
+
