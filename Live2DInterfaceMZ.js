@@ -31,6 +31,12 @@
 * @desc Model placement
 * モデル配置
 *
+* @param ModelScaling
+* @type note
+* @default Scale model
+* @desc Scale model
+* モデルの拡大・縮小
+*
 * @param System
 * @type note
 * @default System
@@ -72,6 +78,13 @@
 * @min 0
 * @max 816
 * @parent ModelPosition
+*
+* @param DefaultScale
+* @type string
+* @desc Model size initial value
+* モデルの大きさ初期値
+* @default 1.0
+* @parent ModelScaling
 *
 * @param pictpriority
 * @type number
@@ -258,12 +271,7 @@
  */
 
 /**
- * //一旦保留
-* @param ModelScaling
-* @type note
-* @default Scale model
-* @desc Scale model
-* モデルの拡大・縮小
+* //一旦保留
 *
 * @param PlayBack
 * @type note
@@ -544,6 +552,8 @@ Game_Live2d.prototype.clear = function() {
 //各モデル設定値の初期化
 Game_Live2d.prototype.InitializeModelSetting = function(){
 
+    var parameters = PluginManager.parameters('Live2DInterfaceMZ');
+
     var i = 1;
 
     L2DINmodels.forEach(function(data) {
@@ -552,7 +562,7 @@ Game_Live2d.prototype.InitializeModelSetting = function(){
         var strCopy = data.folderpath.split('/');
         this._model[i] = strCopy[strCopy.length - 2];
         this.visible[i] = false;
-        this.scale[i] = 1.0;
+        this.scale[i] = Number(parameters['DefaultScale']);
         this.A[i] = 1.0;
         this.R[i] = 1.0;
         this.G[i] = 1.0;
