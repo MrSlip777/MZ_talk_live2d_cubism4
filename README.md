@@ -32,6 +32,6 @@ Project/assets/koharu/<br>
     model3.jsonファイル名：koharu.model3.json<br>
 
 ## プラグイン管理
-プラグインを以下の順番にしてください。
+プラグインを以下の順番で設定してください。
 
 ![プラグイン管理](https://user-images.githubusercontent.com/17643697/126064520-26d6cd8a-e74a-4b72-84c2-5bee4ab7ad63.png)
