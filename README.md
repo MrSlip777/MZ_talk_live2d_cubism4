@@ -57,7 +57,7 @@ foldername：./assets/koharu/<br>
 <モーション組名:グループ名><br>
 例）<きほん:Idle_1><br>
 2組設定した場合は連続でモーション再生します<br>
-例）<れんぞく:Idle_1,Idle_7><br>
+例）<れんぞく:Idle_1,Idle_2><br>
 ※グループ名・・・model3.jsonファイル内のMotionsの名称<br>
 ![motion3.json内のグループ名](https://user-images.githubusercontent.com/17643697/83342186-1f282c80-a327-11ea-9a8b-4f4e6c0b124d.png)<br>
 
