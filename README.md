@@ -62,5 +62,6 @@ foldername：./assets/koharu/<br>
 ![motion3.json内のグループ名](https://user-images.githubusercontent.com/17643697/83342186-1f282c80-a327-11ea-9a8b-4f4e6c0b124d.png)<br>
 
 モーションの再生例は以下になります。<br>
-![参考動画](https://www.youtube.com/watch?v=OUYY3nMYPD0)
+[![再生不可](http://img.youtube.com/vi/OUYY3nMYPD0/0.jpg)](http://www.youtube.com/watch?v=OUYY3nMYPD0)
+
 
