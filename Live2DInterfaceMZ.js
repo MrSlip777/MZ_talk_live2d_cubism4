@@ -1054,19 +1054,7 @@ Sprite_Live2d.prototype.clear = function() {
                     }
                 }
             }
-        }
-
-        
-        if(this.live2dSprite[2]._model){
-            
-            //console.log(outPut);
-            var outPut1 = this.live2dSprite[2]._model.internalModel.motionManager;
-            var outPut11 = this.live2dSprite[2]._model.internalModel.motionManager.motionGroups;
-            var outPut12 = outPut11["Idle"][2].setIsLoop(true);
-            var outPut2 = this.live2dSprite[2]._model;
-            var outPut3 = this.live2dSprite[2]._model.internalModel;
-        }
-    
+        }    
     };
 
     Spriteset_Base.prototype.addChildlive2d = function(Sprite) {
