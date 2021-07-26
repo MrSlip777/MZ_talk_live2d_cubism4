@@ -22,9 +22,6 @@ https://github.com/MrSlip777/MZ_talk_live2d_cubism4<br>
 ※Codeボタン→clone or Downloadからダウンロードできます。
 
 ５．live2dモデル(cubism4.0)をプロジェクトのフォルダ内に置く<br>
-例）プロジェクト名："Project"でモデルのフォルダパスが"assets/koharu/"の場合は<br>
-以下のようになります<br>
-Project/assets/koharu/<br>
 
 ６．model3.jsonファイルと、モデルファイル名を一致させておく<br>
     末尾のフォルダ名とmodel3.jsonのファイル名は同じにしてください。<br>
