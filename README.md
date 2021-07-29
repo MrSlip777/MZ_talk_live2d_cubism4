@@ -51,12 +51,14 @@ foldername：./assets/koharu/<br>
 
 #### motiongroupname
 プラグインコマンドでモーション再生するために必要な”モーション組名”を設定する項目欄です。<br>
-<モーション組名:グループ名><br>
-例）<きほん:Idle_1><br>
+<モーション組名:グループ名_番号><br>
+例）<きほん:Idle_1><br><br>
 2組設定した場合は連続でモーション再生します<br>
-例）<れんぞく:Idle_1,Idle_2><br>
-※グループ名・・・model3.jsonファイル内のMotionsの名称<br>
-![motion3.json内のグループ名](https://user-images.githubusercontent.com/17643697/83342186-1f282c80-a327-11ea-9a8b-4f4e6c0b124d.png)<br>
+例）<れんぞく:Idle_1,Idle_2><br><br>
+グループ名_番号はmodel3.jsonファイル内のパラメータと紐付いています。<br>
+グループ名は、model3.jsonファイル内のMotionsの名称です。<br>
+番号はmotion3.jsonファイルの順番になります。<br>
+![motion3.json内のグループ名と番号](https://user-images.githubusercontent.com/17643697/83342186-1f282c80-a327-11ea-9a8b-4f4e6c0b124d.png)<br>
 
 モーションの再生例は以下になります。<br>
 [![再生不可](http://img.youtube.com/vi/OUYY3nMYPD0/0.jpg)](http://www.youtube.com/watch?v=OUYY3nMYPD0)
