@@ -39,7 +39,7 @@ https://github.com/MrSlip777/MZ_talk_live2d_cubism4<br>
 １．Modelconditionで以下パラメータを設定します。<br>
 ・Modelname<br>
 ・folderpath<br>
-・motiongroupname<br>
+・motiongroupnames<br>
 #### Modelname
 Modelnameはプラグインコマンド名でモデルを呼び出すときの名前です<br>
 例）Modelname：コハル<br>
@@ -49,7 +49,7 @@ Live2Dモデルを置いたフォルダになります。<br>
 フォルダパスが"Project/assets/koharu/"である場合は以下のようになります<br>
 foldername：./assets/koharu/<br>
 
-#### motiongroupname
+#### motiongroupnames
 プラグインコマンドでモーション再生するために必要な”モーション組名”を設定する項目欄です。<br>
 <モーション組名:グループ名_番号><br>
 例）<きほん:Idle_1><br><br>
