@@ -11,7 +11,7 @@ In addition, if you want to publish your game, you must agree to the SDK release
 https://www.live2d.com/download/cubism-sdk/release-license/<br>
 As of October 2020, works can be released free of charge for small businesses, individuals, students, circles, and other organizations with recent sales of less than 10 million yen. <br>
 
-## 準備
+## Preparation
 1．Download Cubism SDK for Web<br>
 https://www.live2d.com/download/cubism-sdk/<br>
 
