@@ -7,6 +7,7 @@
 
 /* 更新履歴
  * Slip 2021/07/11 ツクールMZ用プラグイン向けに作成（ベースはツクールMV用のLive2Dプラグイン）
+ * Slip 2021/08/14 表情変更機能を追加
  *
  * 本プラグインの再配布、改変はLive2D Open Software licenseに準拠します。
  *
@@ -148,6 +149,16 @@
 * @command expression
 * @text 表情変更
 * @desc 指定したモデルの表情を変更します
+*
+* @arg modelName
+* @type string
+* @desc モデル名
+* @default 
+*
+* @arg expressionName
+* @type string
+* @desc exp3.jsonのファイル名(XX.exp3.jsonのXX部分)
+* @default 1
 *
 * @command pos
 * @text 位置変更
@@ -528,6 +539,12 @@ Game_Live2d.prototype.clear = function() {
     //モーションの強制実行フラグ
     this.IsForcedExe_NextMotion = {};
 
+    //表情データ
+    this.expressionName = {};
+
+    //表情変更の強制実行フラグ
+    this.IsForcedExe_ChangeExpression = {};
+
     this.motionLoop = {};
     this.paraminitskip = {};
 
@@ -577,6 +594,9 @@ Game_Live2d.prototype.InitializeModelSetting = function(){
 
         this.IsForcedExe_NextMotion[i] = false;
 
+        this.expressionName[i] = "";
+        this.IsForcedExe_ChangeExpression[i] = false;        
+
         this.motionLoop[i] = false;
         this.paraminitskip[i] = false;
 
@@ -616,6 +636,9 @@ Game_Live2d.prototype.ReflectSavedataToModels = function(){
 
             //モーションを強制実行する
             $gameLive2d.IsForcedExe_NextMotion[i] = true;
+
+            //表情変更を強制実行する
+            $gameLive2d.IsForcedExe_ChangeExpression[i] = true;
 
             $gameLive2d.motionElements[i].splice(0);
 
@@ -834,8 +857,12 @@ Live2DManager.live2dSequenceMotion = function (model_no,motions,loop){
 }
 
 //表情設定
-Live2DManager.live2dExpression = function (model_no,expressionId){
-    $gameLive2d._lappLive2dManager._models.at(model_no-1).changeExpression(expressionId);
+Live2DManager.live2dExpression = function (model_no,expressionName){
+
+    //強制実行
+    $gameLive2d.IsForcedExe_ChangeExpression[model_no] = true;
+
+    $gameLive2d.expressionName[model_no] = expressionName;
 }
 
 //位置変更（移動可能）
@@ -1035,7 +1062,7 @@ Sprite_Live2d.prototype.clear = function() {
 
                 if(this.live2dSprite[i]._model.internalModel){
 
-                    //モーションの開始条件は以下
+                    //モーションの開始条件は以下いずれかが満たされていること
                     //1:モーション終了している
                     //2:プラグインコマンドからの実行（強制実行フラグ：true）
                     if(this.live2dSprite[i]._model.internalModel.motionManager.isFinished()
@@ -1061,6 +1088,26 @@ Sprite_Live2d.prototype.clear = function() {
                             $gameLive2d.IsForcedExe_NextMotion[i] = false;
 
                         }
+                    }
+
+                    //表情変更
+                    if($gameLive2d.IsForcedExe_ChangeExpression[i] == true){
+                        
+                        var expressions = this.live2dSprite[i]._model.internalModel.settings.expressions;
+                        var expressionId = 0;
+
+                        for(var j = 0; j<expressions.length; j++){
+                            if(expressions[j].Name == $gameLive2d.expressionName[i]){
+                                expressionId = j;
+                                break;
+                            }
+                        }
+ 
+                        this.live2dSprite[i]._model.expression(expressionId);
+
+                        //強制実行フラグをオフ（デフォルトに戻す）
+                        $gameLive2d.IsForcedExe_ChangeExpression[i] = false;
+
                     }
                 }
             }
@@ -1203,6 +1250,12 @@ Sprite_Live2d.prototype.clear = function() {
         Live2DManager.live2dSequenceMotion(model_no,innerMotionName,loop);
     });
 
+    //表情変更
+    PluginManager.registerCommand(pluginName, "expression", args => {
+        var model_no = Live2DManager.getNumberFromName(args.modelName);
+        Live2DManager.live2dExpression(model_no,args.expressionName);
+    });
+
     //位置変更
     //左
     PluginManager.registerCommand(pluginName, "left", args => {
@@ -1255,22 +1308,9 @@ Sprite_Live2d.prototype.clear = function() {
         case '表情':
             Live2DManager.live2dExpression(model_no,args[2]);
             break;
-        case 'Xposition':
-        case 'X位置':
-            Live2DManager.live2dSetPosition_X(model_no,args[2]);
-            break;
-        case 'Yposition':
-        case 'Y位置':
-            Live2DManager.live2dSetPosition_Y(model_no,args[2]);
-            break;
         case 'grayscale':
         case 'グレースケール':
             Live2DManager.live2dSetGrayscale(model_no,args[2]);
-            break;
-
-        case 'upsidedown':
-        case '上下反転':
-            Live2DManager.live2dSetScale(model_no,args[2]);
             break;
         case '衣装変更':
         case 'changecloth':
