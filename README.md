@@ -65,4 +65,8 @@ foldername：./assets/koharu/<br>
 モーションの再生例は以下になります。<br>
 [![再生不可](http://img.youtube.com/vi/OUYY3nMYPD0/0.jpg)](http://www.youtube.com/watch?v=OUYY3nMYPD0)
 
+## 表情変更コマンドについて
 
+![表情変更_model3json内](https://user-images.githubusercontent.com/17643697/129433467-8306e86d-2045-41a5-a668-6ae2115dd190.png)
+
+![表情変更_model3json内](https://user-images.githubusercontent.com/17643697/129433463-da4f34e5-a10d-419f-8889-c696772aa2dd.png)
