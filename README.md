@@ -67,6 +67,10 @@ foldername：./assets/koharu/<br>
 
 ## 表情変更コマンドについて
 
+表情変更コマンドはモデル名、表情名がパラメータとなります。<br>
+モデル名はModelconditionで設定したModelnameです。<br>
+表情名はmodel3.json内のNameに記載された文字列になります。<br>
+
 ![表情変更_model3json内](https://user-images.githubusercontent.com/17643697/129433467-8306e86d-2045-41a5-a668-6ae2115dd190.png)
 
-![表情変更_model3json内](https://user-images.githubusercontent.com/17643697/129433463-da4f34e5-a10d-419f-8889-c696772aa2dd.png)
+![表情変更_コマンド設定](https://user-images.githubusercontent.com/17643697/129433463-da4f34e5-a10d-419f-8889-c696772aa2dd.png)
