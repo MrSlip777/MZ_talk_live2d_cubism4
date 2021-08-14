@@ -157,7 +157,7 @@
 *
 * @arg expressionName
 * @type string
-* @desc exp3.jsonのファイル名(XX.exp3.jsonのXX部分)
+* @desc model3.json "Expressions"のName
 * @default 1
 *
 * @command pos
