@@ -1077,10 +1077,14 @@ Sprite_Live2d.prototype.clear = function() {
 
                             this.live2dSprite[i]._model.internalModel.motionManager.stopAllMotions();
 
-                            //モーションのループ設定
-                            this.live2dSprite[i]._model.internalModel.motionManager
-                            .motionGroups[motionElement.groupName][motionElement.number]
-                            .setIsLoop(motionElement.Isloop);
+                            //エラー回避　2023/01/25 slip
+                            if(this.live2dSprite[i]._model.internalModel.motionManager
+                                .motionGroups[motionElement.groupName][motionElement.number] !== undefined){
+                                //モーションのループ設定
+                                this.live2dSprite[i]._model.internalModel.motionManager
+                                .motionGroups[motionElement.groupName][motionElement.number]
+                                .setIsLoop(motionElement.Isloop);
+                            }
                             
                             this.live2dSprite[i]._model.motion(motionElement.groupName,motionElement.number,3);
 
@@ -1095,11 +1099,13 @@ Sprite_Live2d.prototype.clear = function() {
                         
                         var expressions = this.live2dSprite[i]._model.internalModel.settings.expressions;
                         var expressionId = 0;
-
-                        for(var j = 0; j<expressions.length; j++){
-                            if(expressions[j].Name == $gameLive2d.expressionName[i]){
-                                expressionId = j;
-                                break;
+                        //エラー回避　2023/01/25 slip
+                        if(expressions !== undefined){
+                            for(var j = 0; j<expressions.length; j++){
+                                if(expressions[j].Name == $gameLive2d.expressionName[i]){
+                                    expressionId = j;
+                                    break;
+                                }
                             }
                         }
  
